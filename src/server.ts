@@ -1,7 +1,7 @@
-import 'dotenv/config';
 import app from './app.ts';
+import { config } from './lib/config.ts';
 
-const port = parseInt(process.env.PORT || "5000", 10);
+const port = config.PORT;
 app.listen(port, () => {
     console.log(`Server running on port ${port}`)
 });

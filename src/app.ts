@@ -1,5 +1,6 @@
 import express, { type Express, type Request, type Response } from "express";
 import ProductRouter from "./routes/product.route.ts";
+import { config } from "./lib/config.ts";
 
 const app: Express = express();
 
