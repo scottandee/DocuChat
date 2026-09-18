@@ -17,9 +17,14 @@ app.use((req: Request, res: Response, next: NextFunction) => {
     next();
 });
 
-app.get("/", (req: Request, res: Response) => {
-    res.send("Hello World");
-})
+// ========= HEALTH CHECK ================
+app.get("/health", (req: Request, res: Response) => {
+    res.json({
+        status: "ok",
+        timestamp: new Date().toISOString(),
+        environment: config.NODE_ENV,
+    });
+});
 
 app.use("/products", ProductRouter);
 
