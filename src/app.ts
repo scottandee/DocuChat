@@ -1,5 +1,6 @@
 import express, { type Express, type NextFunction, type Request, type Response } from "express";
 import ProductRouter from "./routes/product.route.ts";
+import AuthRouter from "./routes/auth.routes.ts";
 import { config } from "./lib/config.ts";
 import { logger } from "./lib/logger.ts";
 
@@ -27,5 +28,6 @@ app.get("/health", (req: Request, res: Response) => {
 });
 
 app.use("/products", ProductRouter);
+app.use("/api/auth", AuthRouter);
 
 export default app;

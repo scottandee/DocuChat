@@ -14,7 +14,6 @@ export const userRepository = {
     },
 
     async create(data: {
-        name: string,
         email: string,
         passwordHash: string,
     }) {
