@@ -2,6 +2,8 @@ import express, { type Express, type NextFunction, type Request, type Response }
 import AuthRouter from "./routes/auth.route.ts";
 import { config } from "./lib/config.ts";
 import { logger } from "./lib/logger.ts";
+import swaggerUi from "swagger-ui-express"
+import { swaggerSpec } from "./config/swagger.ts";
 
 const app: Express = express();
 
@@ -24,6 +26,11 @@ app.get("/health", (req: Request, res: Response) => {
         timestamp: new Date().toISOString(),
         environment: config.NODE_ENV,
     });
+});
+
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.get("/api-docs.json", (req, res) => {
+    res.json(swaggerSpec);
 });
 
 app.use("/api/v1/auth", AuthRouter);
