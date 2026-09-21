@@ -33,7 +33,7 @@ export async function login( data: {
         throw new Error("Invalid Credentials");
     }
 
-    const valid = verifyPassword(data.password, user.passwordHash);
+    const valid = await verifyPassword(data.password, user.passwordHash);
     if (!valid) {
         throw new Error("Invalid Credentials");
     }
