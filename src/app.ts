@@ -1,5 +1,5 @@
 import express, { type Express, type NextFunction, type Request, type Response } from "express";
-import AuthRouter from "./routes/auth.routes.ts";
+import AuthRouter from "./routes/auth.route.ts";
 import { config } from "./lib/config.ts";
 import { logger } from "./lib/logger.ts";
 
