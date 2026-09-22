@@ -5,7 +5,10 @@
   "main": "server.ts",
   "type": "module",
   "scripts": {
-    "start": "tsx ./src/server.ts"
+    "start": "tsx ./src/server.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "author": "",
   "license": "ISC",
@@ -31,10 +34,12 @@
     "@types/pg": "^8.23.1",
     "@types/swagger-jsdoc": "^6.0.4",
     "@types/swagger-ui-express": "^4.1.8",
+    "@vitest/coverage-v8": "^5.0.1",
     "globals": "^17.12.0",
     "prisma": "^7.10.0",
     "tsx": "^4.23.13",
-    "typescript": "7.0.2"
+    "typescript": "7.0.2",
+    "vitest": "^5.0.1"
   },
   "allowScripts": {
     "@prisma/engines@7.10.0": true,
