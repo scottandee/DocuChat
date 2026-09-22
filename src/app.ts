@@ -4,6 +4,8 @@ import { config } from "./lib/config.ts";
 import { logger } from "./lib/logger.ts";
 import swaggerUi from "swagger-ui-express"
 import { swaggerSpec } from "./config/swagger.ts";
+import { errorHandler } from "./middlewares/error.middleware.ts";
+import { NotFoundError } from "./lib/errors.ts";
 
 const app: Express = express();
 
@@ -34,5 +36,12 @@ app.get("/api-docs.json", (req, res) => {
 });
 
 app.use("/api/v1/auth", AuthRouter);
+
+app.use((req, res, next) => {
+    next(new NotFoundError(
+        `Route ${req.method} ${req.originalUrl} not found`
+    ));
+});
+app.use(errorHandler);
 
 export default app;
