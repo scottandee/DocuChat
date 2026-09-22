@@ -122,7 +122,7 @@ router.post("/refresh", validate(refreshSchema), refreshTokenController);
  *       400:
  *         description: Validation error
  *       401:
- *         description: Invalid or expired refresh token
+ *         description: Invalid, expired or revoked refresh token
  */
 router.post("/logout", validate(refreshSchema), logoutController);
 
