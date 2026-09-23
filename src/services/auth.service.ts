@@ -3,7 +3,7 @@ import { hashPassword, verifyPassword } from "../lib/password.ts";
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from "../lib/tokens.ts";
 import { userRepository } from "../repositories/user.repository.ts";
 import { prisma } from "../lib/prisma.ts";
-import { ConflictError, NotFoundError, UnauthorizedError } from "../lib/errors.ts";
+import { ConflictError, UnauthorizedError } from "../lib/errors.ts";
 
 export async function register(data: {
     email: string,
