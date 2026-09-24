@@ -1,3 +1,4 @@
+/* eslint-disable n/no-unpublished-import */
 import { describe, expect, it, vi } from "vitest";
 import { userRepository } from "../../repositories/user.repository.ts";
 import * as authService from "../auth.service.ts";
@@ -19,13 +20,19 @@ vi.mock("../../lib/password.ts", () => ({
 describe("auth.service.register", () => {
     it("creates a user with a hashed password", async () => {
         vi.mocked(userRepository.findByEmail).mockResolvedValue(null);
-        vi.mocked(userRepository.create as any).mockResolvedValue({
+        vi.mocked(userRepository.create).mockResolvedValue({
             id: "cuid",
             email: "example@gmail.com",
+            name: null,
             tier: "free",
+            role: "user",
+            isActive: true,
+            deletedAt: null,
+            createdAt: new Date(),
+            updatedAt: new Date(),
             passwordHash: "$2b$12$...",
         });
-        vi.mocked(hashPassword as any).mockReturnValue("$2b$12$...")
+        vi.mocked(hashPassword).mockResolvedValue("$2b$12$...")
 
         const result = await authService.register({
             email: "example@gmail.com",
@@ -43,8 +50,17 @@ describe("auth.service.register", () => {
     });
 
     it("throws an error if email exists", async () => {
-        vi.mocked(userRepository.findByEmail as any).mockResolvedValue({
+        vi.mocked(userRepository.findByEmail).mockResolvedValue({
             id: "cuid",
+            email: "example@gmail.com",
+            name: null,
+            passwordHash: "$2b$12$...",
+            role: "user",
+            tier: "free",
+            isActive: true,
+            deletedAt: null,
+            createdAt: new Date(),
+            updatedAt: new Date(),
         })
 
         const conflictCall = async () => await authService.register({
@@ -54,4 +70,18 @@ describe("auth.service.register", () => {
 
         await expect(conflictCall).rejects.toThrow(/already registered/);
     });
+});
+
+describe("auth.service.login", () => {
+    it("tokens are sent back for valid credentials");
+    it("throw error for invalid credentials (email and or password");
+    it("hashes refresh token before storage");
+});
+
+describe("auth.service.refresh", () => {
+    it("invalid token type is rejected")
+    it("invalid token is rejected")
+    it("expired token is rejected")
+    it("is hashed before storage");
+    it("returns a new token if successful")
 });

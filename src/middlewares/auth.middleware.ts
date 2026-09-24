@@ -2,16 +2,14 @@ import type { NextFunction, Request, Response } from "express";
 import { verifyAccessToken } from "../lib/tokens.ts";
 
 
-declare global {
-  namespace Express {
+declare module "express-serve-static-core" {
     interface Request {
-      user?: { id: string, role: string };
-    }
+        user?: { id: string, role: string };
   }
 }
 
 export function authenticate(
-    req: Request, res: Response, next: NextFunction
+    req: Request, res: Response
 ) {
     const header = req.headers.authorization;
 
@@ -27,8 +25,8 @@ export function authenticate(
             return res.status(401).json({ error: "Invalid token type" });
         }
     }
-    catch (error: any) {
-        if (error.name === "TokenExpiredError") {
+    catch (error: unknown) {
+        if (error instanceof Error && error.name === "TokenExpiredError") {
             return res.status(401).json({ error: "Token expired" });
         }
         return res.status(401).json({ error: "Invalid token" });

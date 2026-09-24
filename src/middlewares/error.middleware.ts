@@ -1,12 +1,10 @@
-import type { NextFunction, Request, Response } from "express";
+import type { Request, Response } from "express";
 import { AppError } from "../lib/errors.ts";
-import { success } from "zod";
 
 export function errorHandler(
     error: Error,
     req: Request,
     res: Response,
-    next: NextFunction
 ) {
     if (error instanceof AppError) {
         console.warn(

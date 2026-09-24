@@ -67,7 +67,7 @@ export async function refresh(rawRefreshToken: string) {
     try {
         payload = verifyRefreshToken(rawRefreshToken);
     }
-    catch(error) {
+    catch {
         throw new UnauthorizedError("Invalid refresh token");
     }
 

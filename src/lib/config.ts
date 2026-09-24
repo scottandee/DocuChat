@@ -21,7 +21,7 @@ if (!parsed.success)
 {
     console.error("Invalid Environment variables");
     console.error(parsed.error.issues);
-    process.exit(1);
+    throw new Error("Invalid environment variables");
 }
 
 export const config = parsed.data;
