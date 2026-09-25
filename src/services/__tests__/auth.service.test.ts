@@ -1,8 +1,19 @@
-/* eslint-disable n/no-unpublished-import */
 import { describe, expect, it, vi } from "vitest";
 import { userRepository } from "../../repositories/user.repository.ts";
 import * as authService from "../auth.service.ts";
 import { hashPassword } from "../../lib/password.ts";
+import { prisma } from "../../lib/prisma.ts";
+
+vi .mock("../../lib/prisma.ts", () => ({
+	prisma: {
+		role: {
+			findFirst: vi.fn(),
+		},
+		userRole: {
+			create: vi.fn(),
+		}
+	}
+}));
 
 vi.mock("../../repositories/user.repository.ts", () => ({
     userRepository: {
@@ -25,7 +36,6 @@ describe("auth.service.register", () => {
             email: "example@gmail.com",
             name: null,
             tier: "free",
-            role: "user",
             isActive: true,
             deletedAt: null,
             createdAt: new Date(),
@@ -33,7 +43,14 @@ describe("auth.service.register", () => {
             passwordHash: "$2b$12$...",
         });
         vi.mocked(hashPassword).mockResolvedValue("$2b$12$...")
-
+	vi.mocked(prisma.role.findFirst).mockResolvedValue({
+		id: "cuid",
+        name: "string",
+        description: null,
+        isDefault: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+	});
         const result = await authService.register({
             email: "example@gmail.com",
             password: "SecurePass123",
@@ -55,7 +72,6 @@ describe("auth.service.register", () => {
             email: "example@gmail.com",
             name: null,
             passwordHash: "$2b$12$...",
-            role: "user",
             tier: "free",
             isActive: true,
             deletedAt: null,
