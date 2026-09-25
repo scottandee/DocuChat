@@ -18,6 +18,13 @@ export default tseslint.config(
       "no-console": "off",
       "n/no-missing-import": "off",
 
+      "n/no-unpublished-import": [
+        "error",
+        {
+          "allowModules": ["../../prisma/generated/client"]
+        }
+      ],
+
       "@typescript-eslint/no-unused-vars": [
         "warn",
         { argsIgnorePattern: "^_" },
@@ -28,6 +35,6 @@ export default tseslint.config(
   },
 
   {
-    ignores: ["dist/", "build/", "node_modules/"],
+    ignores: ["dist/", "build/", "node_modules/",],
   },
 );
