@@ -1,10 +1,11 @@
-import type { Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
 import { AppError } from "../lib/errors.ts";
 
 export function errorHandler(
     error: Error,
     req: Request,
     res: Response,
+    _next: NextFunction
 ) {
     if (error instanceof AppError) {
         console.warn(
