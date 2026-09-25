@@ -1,12 +1,19 @@
-import { prisma } from "../src/lib/prisma.ts";
-import type { Permission } from "./generated/client.ts";
+import { Pool } from "pg";
+import { PrismaClient, type Permission } from "./generated/client.ts";
+import { PrismaPg } from "@prisma/adapter-pg";
 
+const connectionString = `${process.env.DATABASE_URL}`;
+const pool = new Pool({ connectionString });
+const adapter = new PrismaPg(pool);
+const prisma = new PrismaClient({ adapter });
 
 seedRBAC().then(async () => {
     await prisma.$disconnect();
+    await pool.end();
 }).catch(async(e) => {
     console.error(e);
     await prisma.$disconnect();
+    await pool.end();
     process.exit(1);
 });
 
