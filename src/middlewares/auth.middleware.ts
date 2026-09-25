@@ -1,5 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
 import { verifyAccessToken } from "../lib/tokens.ts";
+import { ForbiddenError, UnauthorizedError } from "../lib/errors.ts";
+import { getUserPermissions } from "../services/rbac.service.ts";
 
 
 declare module "express-serve-static-core" {
@@ -9,40 +11,57 @@ declare module "express-serve-static-core" {
 }
 
 export function authenticate(
-    req: Request, res: Response
+    req: Request, res: Response, next: NextFunction
 ) {
-    const header = req.headers.authorization;
-
-    if (!header || !header.startsWith("Bearer ")) {
-        return res.status(401).json({ error: "No token provided" });
-    }
-
-    const token = header.split(" ")[1];
-
     try {
-        const payload = verifyAccessToken(token);
-        if (payload.type != "access") {
-            return res.status(401).json({ error: "Invalid token type" });
+        const header = req.headers.authorization;
+
+        if (!header || !header.startsWith("Bearer ")) {
+            throw new UnauthorizedError("No token provided");
         }
-    }
-    catch (error: unknown) {
-        if (error instanceof Error && error.name === "TokenExpiredError") {
-            return res.status(401).json({ error: "Token expired" });
+
+        const token = header.split(" ")[1];
+
+        try {
+            const payload = verifyAccessToken(token);
+            if (payload.type != "access") {
+                throw new UnauthorizedError("Invalid token type");
+            }
+
+            req.user = { id: payload.sub, role: payload.role };
+            next();
         }
-        return res.status(401).json({ error: "Invalid token" });
+        catch (error: unknown) {
+            if (error instanceof Error && error.name === "TokenExpiredError") {
+                throw new UnauthorizedError("Token expired");
+            }
+            throw new UnauthorizedError("Invalid token");
+        }
+    } catch (error) {
+        next(error);
     }
 }
 
-export function authorize(
-    ...allowedRoles: string[]
+export function requirePermission(
+    ...requiredPermissions: string[]
 ) {
-    return (req: Request, res: Response, next: NextFunction) => {
-        if (!req.user) {
-            return res.status(401).json({ error: 'Not authenticated' });
+    return async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            if (!req.user) {
+                throw new UnauthorizedError("Not authenticated");
+            }
+
+            const userPermissions = await getUserPermissions(req.user.id);
+            
+            const missing = requiredPermissions.filter(
+                (p) => !userPermissions.has(p)
+            );
+            if (missing.length > 0) {
+                throw new ForbiddenError("You do not have the required permission");
+            }
+            next();
+        } catch (error) {
+            next(error);
         }
-        if (!allowedRoles.includes(req.user.role)) {
-            return res.status(403).json({ error: 'Insufficient permissions' });
-        }
-        next();
     };
 }
