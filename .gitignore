@@ -1,4 +1,5 @@
 node_modules/
 coverage/
+prisma/generated/
 .env
 *lock.toml
