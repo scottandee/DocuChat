@@ -1,4 +1,5 @@
 import { NotFoundError } from "../lib/errors.ts";
+import { appEvents } from "../lib/events.ts";
 import { prisma } from "../lib/prisma.ts";
 
 export async function fetchRoles() {
@@ -41,6 +42,12 @@ export async function assignRole(data: {
         }
     });
 
+    appEvents.emit("admin:role-assigned", {
+        targetUserId: data.userId,
+        roleName: data.roleName,
+        assignedBy: data.assignedBy,
+    })
+
     return {
         success: true,
         data: { message: `Role '${data.roleName}' assigned to user`},
@@ -48,7 +55,7 @@ export async function assignRole(data: {
 }
 
 export async function revokeRole(data: {
-    userId: string, roleName: string,
+    userId: string, revokedBy: string, roleName: string,
 }) {
     const user = await prisma.user.findUnique({ where: { id: data.userId } });
     if (!user) throw new NotFoundError("User not found");
@@ -58,6 +65,12 @@ export async function revokeRole(data: {
 
     await prisma.userRole.deleteMany({
         where: { userId:  data.userId, roleId: role.id },
+    });
+
+    appEvents.emit("admin:role-revoked", {
+        targetUserId: data.userId,
+        roleName: data.roleName,
+        revokedBy: data.revokedBy,
     });
 
     return {

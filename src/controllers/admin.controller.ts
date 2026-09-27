@@ -34,6 +34,7 @@ export async function revokeRoleController(
         const result = await revokeRole({
             userId: req.params.userId,
             roleName: req.params.roleName,
+            revokedBy: req.user?.id,
             ...req.body,
          });
         res.json(result);
