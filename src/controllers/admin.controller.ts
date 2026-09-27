@@ -1,5 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
-import { assignRole, fetchRoles, revokeRole } from "../services/admin.service.ts";
+import { assignRole, fetchRoles, revokeRole } from "../services/user.service.ts";
 
 export async function fetchRolesController(
     req: Request, res: Response, next: NextFunction

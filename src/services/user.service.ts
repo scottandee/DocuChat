@@ -1,6 +1,32 @@
-import { NotFoundError } from "../lib/errors.ts";
 import { appEvents } from "../lib/events.ts";
+import { NotFoundError } from "../lib/errors.ts";
 import { prisma } from "../lib/prisma.ts";
+
+export async function getUserPermissions(
+    userId: string
+): Promise<Set<string>> {
+    const roles = await prisma.userRole.findMany({
+        where: { userId },
+        include: {
+            role: {
+                include: {
+                    permissions: {
+                        include: { permission: true }
+                    }
+                }
+            }
+        }
+    });
+
+    const permissions = new Set<string>();
+    for (const ur of roles) {
+        for (const rp of ur.role.permissions) {
+            permissions.add(rp.permission.name);
+        }
+    }
+
+    return permissions;
+}
 
 export async function fetchRoles() {
     const roles = await prisma.role.findMany({

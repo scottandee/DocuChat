@@ -1,7 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
 import { verifyAccessToken } from "../lib/tokens.ts";
 import { ForbiddenError, UnauthorizedError } from "../lib/errors.ts";
-import { getUserPermissions } from "../services/rbac.service.ts";
+import { getUserPermissions } from "../services/user.service.ts";
 
 
 declare module "express-serve-static-core" {
