@@ -18,10 +18,12 @@ model User {
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 
-  refreshToken  RefreshToken[]
-  roles         UserRole[]
-  usageLog      UsageLog[]
-  documents     Document[]
+
+  refreshToken    RefreshToken[]
+  roles           UserRole[]
+  usageLog        UsageLog[]
+  documents       Document[]
+  conversations   Conversation[]
 
 
   @@index([email])
@@ -102,8 +104,9 @@ model Document {
   id          String    @id @default(cuid())
   userId      String
   title       String
+  description String
   filename    String
-  status      String    @default("idle")
+  status      String    @default("pending")
   chunkCount  Int
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -117,12 +120,15 @@ model Document {
 
 model Conversation {
   id          String    @id @default(cuid())
+  userId      String
   documentId  String
   title       String
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
   messages    Message[]
+
+  user        User      @relation(fields: [userId], references: [id])
 }
 
 model Message {
