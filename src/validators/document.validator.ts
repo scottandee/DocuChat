@@ -10,3 +10,9 @@ export const listDocumentsSchema = z.object({
         sortOrder: z.enum(["asc", "desc"]).default("desc"),
     }),
 });
+
+export const documentParamsSchema = z.object({
+    params: z.object({
+        documentId: z.string().regex(/^[a-z0-9]+$/, "Invalid document ID"),
+    }),
+});

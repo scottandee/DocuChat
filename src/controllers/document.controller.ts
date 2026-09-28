@@ -1,5 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
-import { listDocuments } from "../services/document.service.ts";
+import { deleteDocument, getDocument, listDocuments } from "../services/document.service.ts";
 
 export async function listDocumentsController(
     req: Request, res: Response, next: NextFunction
@@ -16,6 +16,36 @@ export async function listDocumentsController(
         return res.json(documents);
     }
     catch (error) {
+        next(error);
+    }
+}
+
+export async function getDocumentController(
+    req: Request, res: Response, next: NextFunction
+) {
+    try {
+        const document = await getDocument({
+            userId: req.user!.id,
+            documentId: req.params.documentId,
+            ...req.body
+        });
+        res.json(document);
+    } catch (error) {
+        next(error)
+    }
+}
+
+export async function deleteDocumentController(
+    req: Request, res: Response, next: NextFunction
+) {
+    try {
+        const result = await deleteDocument({
+            userId: req.user!.id,
+            documentId: req.params.documentId,
+            ...req.body
+        });
+        return res.json(result);
+    } catch(error) {
         next(error);
     }
 }

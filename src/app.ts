@@ -10,6 +10,7 @@ import { swaggerSpec } from "./config/swagger.ts";
 import { errorHandler } from "./middlewares/error.middleware.ts";
 import { NotFoundError } from "./lib/errors.ts";
 import "./events/admin.events.ts";
+import "./events/document.events.ts";
 
 const app: Express = express();
 

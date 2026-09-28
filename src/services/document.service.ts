@@ -1,5 +1,13 @@
 import type { Prisma } from "../../prisma/generated/client.ts";
+import { DOC_EVENTS } from "../events/document.events.ts";
+import { NotFoundError } from "../lib/errors.ts";
+import { appEvents } from "../lib/events.ts";
 import { prisma } from "../lib/prisma.ts";
+import { getUserPermissions } from "./user.service.ts";
+
+export const DOC_MESSAGES = {
+    NOT_FOUND: "Document not found",
+}
 
 export async function listDocuments (
     userId: string,
@@ -57,4 +65,55 @@ export async function listDocuments (
         data: documents,
         meta: { page, limit, total },
     }
+}
+
+export async function getDocument(data: {
+     userId: string, documentId: string
+}) {
+    const document = await prisma.document.findUnique({
+        where: { id: data.documentId },
+    });
+
+    if (!document) throw new NotFoundError(DOC_MESSAGES.NOT_FOUND);
+
+    if (document.userId !== data.userId) {
+        const permissions = await getUserPermissions(data.userId);
+        if (!permissions.has("users:manage")) {
+            throw new NotFoundError(DOC_MESSAGES.NOT_FOUND)
+        }
+    }
+
+    return { success: true, data: document };
+}
+
+export async function deleteDocument(data: {
+     userId: string, documentId: string
+}) {
+    const document = await prisma.document.findUnique({
+        where: { id: data.documentId },
+    });
+
+    if (!document || document.deletedAt) {
+        throw new NotFoundError(DOC_MESSAGES.NOT_FOUND);
+    }
+
+    if (document.userId !== data.userId) {
+        throw new NotFoundError(DOC_MESSAGES.NOT_FOUND);
+    }
+
+    const result = prisma.document.update({
+        where: { id: data.documentId },
+        data: {
+            deletedAt: new Date(),
+            deletedBy: data.userId,
+        },
+    });
+
+    appEvents.emit(DOC_EVENTS.DELETED, {
+        deletedBy: data.userId,
+        documentId: data.documentId,
+        title: document.title,
+    });
+
+    return result;
 }
