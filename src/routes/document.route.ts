@@ -1,8 +1,8 @@
 import { Router } from "express";
 import { authenticate, requirePermission } from "../middlewares/auth.middleware.ts";
 import { validate } from "../middlewares/validate.middleware.ts";
-import { documentParamsSchema, listDocumentsSchema } from "../validators/document.validator.ts";
-import { deleteDocumentController, getDocumentController, listDocumentsController } from "../controllers/document.controller.ts";
+import { createDocumentSchema, documentParamsSchema, listDocumentsSchema } from "../validators/document.validator.ts";
+import { createDocumentCOntroller, deleteDocumentController, getDocumentController, listDocumentsController } from "../controllers/document.controller.ts";
 
 const router = Router()
 router.use(authenticate)
@@ -19,9 +19,10 @@ router.get("/:documentId",
     getDocumentController,
 );
 
-// TODO
 router.post("/",
     requirePermission("documents:create"),
+    validate(createDocumentSchema),
+    createDocumentCOntroller,
 )
 
 router.delete("/",

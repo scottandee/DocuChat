@@ -12,7 +12,7 @@ const envSchema = z.object({
     ACCESS_TOKEN_EXPIRES_IN: z.string().default("15m"),
     REFRESH_TOKEN_EXPIRES_IN: z.string().default("7d"),
     OPENAI_API_URL: z.string().optional(),
-    REDIS_URL: z.string().optional(),
+    REDIS_URL: z.string().min(1, "REDIS_URL is required"),
 });
 
 const parsed = envSchema.safeParse(process.env)

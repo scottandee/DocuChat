@@ -16,3 +16,10 @@ export const documentParamsSchema = z.object({
         documentId: z.string().regex(/^[a-z0-9]+$/, "Invalid document ID"),
     }),
 });
+
+export const createDocumentSchema = z.object({
+    body: z.object({
+        title: z.string().min(1, "Must provide title"),
+        content: z.string().min(1, "Must provide content"),
+    }),
+});

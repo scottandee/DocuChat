@@ -3,6 +3,7 @@ import { DOC_EVENTS } from "../events/document.events.ts";
 import { NotFoundError } from "../lib/errors.ts";
 import { appEvents } from "../lib/events.ts";
 import { prisma } from "../lib/prisma.ts";
+import { queueDocumentForProcessing } from "../queues/document.queue.ts";
 import { getUserPermissions } from "./user.service.ts";
 
 export const DOC_MESSAGES = {
@@ -116,4 +117,36 @@ export async function deleteDocument(data: {
     });
 
     return result;
+}
+
+export async function createDocument(data: { 
+    title: string,
+    content: string,
+    userId: string,
+}) {
+    const document = await prisma.document.create({
+        data: {
+            userId: data.userId,
+            title: data.title,
+            filename: data.title.toLowerCase().replace(/\s+/g, "-"),
+            content: data.content,
+            status: "pending",
+        },
+    });
+
+    const jobId = await queueDocumentForProcessing(document.id, data.userId);
+
+    appEvents.emit(DOC_EVENTS.CREATED, {
+        documentId: document.id,
+        userId: data.userId,
+        title: document.title,
+    });
+
+    return {
+        success: true,
+        data: {
+            document,
+            jobId,
+        }
+    };
 }
