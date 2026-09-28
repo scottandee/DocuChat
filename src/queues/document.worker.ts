@@ -4,6 +4,7 @@ import { prisma } from "../lib/prisma.ts";
 import { estimateTokens, splitIntoChunks } from "../lib/chunker.ts";
 import { appEvents } from "../lib/events.ts";
 import { DOC_EVENTS } from "../events/document.events.ts";
+import { deadLetterQueue } from "./dead-letter.queue.ts";
 
 const worker = new Worker(
     "document-processing",
@@ -74,8 +75,21 @@ worker.on("completed", (job) => {
     console.log(`Job ${job.id} completed: ${job.returnvalue.chunks} chunks`);
 })
 
-worker.on("failed", (job, error) => {
-    console.log(`Job ${job?.id} failed: (attempts ${job?.attemptsMade}):`, error.message);
+worker.on("failed", async (job, error) => {
+    if (!job) return;
+
+    if (job.attemptsMade >= (job.opts.attempts ?? 3)) {
+        console.error(`Job ${job?.id} failed: (attempts ${job?.attemptsMade}):`, error.message);
+        
+        await deadLetterQueue.add("failed-document", {
+            originalJobId: job.id,
+            OriginalQueue: "document-processing",
+            data: job.data,
+            error: error.message,
+            failedAt: new Date().toISOString(),
+            attempts: job.attemptsMade,
+        });
+    }
 });
 
 worker.on("error", (error) => {
