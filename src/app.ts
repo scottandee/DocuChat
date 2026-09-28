@@ -1,6 +1,8 @@
 import express, { type Express, type NextFunction, type Request, type Response } from "express";
 import AuthRouter from "./routes/auth.route.ts";
 import AdminRouter from "./routes/admin.route.ts";
+import DocumentRouter from "./routes/document.route.ts";
+import ConversationRouter from "./routes/conversation.route.ts";
 import { config } from "./lib/config.ts";
 import { logger } from "./lib/logger.ts";
 import swaggerUi from "swagger-ui-express"
@@ -39,6 +41,8 @@ app.get("/api-docs.json", (req, res) => {
 
 app.use("/api/v1/auth", AuthRouter);
 app.use("/api/v1/admin", AdminRouter);
+app.use("/api/v1/documents", DocumentRouter);
+app.use("/api/v1/conversations", ConversationRouter);
 
 app.use((req, res, next) => {
     next(new NotFoundError(
