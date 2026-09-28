@@ -25,7 +25,11 @@ export function validate(schema: z.ZodObject) {
         }
         req.body = result.data.body ?? req.body;
         req.params = (result.data.params ?? req.params) as Request["params"];
-        req.query = (result.data.query ?? req.query) as Request["query"];
+        Object.defineProperty(req, "query", {
+            configurable: true,
+            enumerable: true,
+            value: result.data.query ?? req.query,
+        });
 
         next();
     };
