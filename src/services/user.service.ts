@@ -1,10 +1,18 @@
 import { appEvents } from "../lib/events.ts";
 import { NotFoundError } from "../lib/errors.ts";
 import { prisma } from "../lib/prisma.ts";
+import { CACHE_TTL, cacheGet, cacheSet } from "../lib/cache.ts";
 
 export async function getUserPermissions(
     userId: string
 ): Promise<Set<string>> {
+    const cacheKey = `permssions:${userId}`;
+
+    const cached = await cacheGet<string[]>(cacheKey);
+    if (cached) {
+        return new Set(cached);
+    }
+
     const roles = await prisma.userRole.findMany({
         where: { userId },
         include: {
@@ -24,6 +32,8 @@ export async function getUserPermissions(
             permissions.add(rp.permission.name);
         }
     }
+
+    await cacheSet(cacheKey, [...permissions], CACHE_TTL.PERMISSIONS);
 
     return permissions;
 }
