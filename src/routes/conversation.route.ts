@@ -3,12 +3,16 @@ import { authenticate, requirePermission } from "../middlewares/auth.middleware.
 import { listConversationsController } from "../controllers/conversation.controller.ts";
 import { validate } from "../middlewares/validate.middleware.ts";
 import { listConversationsSchema } from "../validators/conversation.validator.ts";
+import { conditionalGet } from "../middlewares/etag.middleware.ts";
+import { noCache } from "../middlewares/cache-control.middleware.ts";
 
 const router = Router();
 router.use(authenticate);
 
 router.get("/",
+    conditionalGet(),
     requirePermission("conversations:read"),
+    noCache,
     validate(listConversationsSchema),
     listConversationsController
 );

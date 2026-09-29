@@ -9,6 +9,7 @@ import {
     getDocumentController,
     listDocumentsController
 } from "../controllers/document.controller.ts";
+import { conditionalGet } from "../middlewares/etag.middleware.ts";
 
 const router = Router()
 router.use(authenticate)
@@ -20,6 +21,7 @@ router.get("/",
 );
 
 router.get("/:documentId",
+    conditionalGet(),
     requirePermission("documents:read"),
     validate(documentParamsSchema),
     getDocumentController,

@@ -29,6 +29,8 @@ export async function getDocumentController(
             documentId: req.params.documentId,
             ...req.body
         });
+
+        res.setHeader("Cache-Control", "private, max-age=600");
         res.json(document);
     } catch (error) {
         next(error)

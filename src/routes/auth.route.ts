@@ -7,8 +7,11 @@ import {
 } from "../controllers/auth.controller.ts";
 import { validate } from "../middlewares/validate.middleware.ts";
 import { loginSchema, refreshSchema, registerSchema } from "../validators/auth.validator.ts";
+import app from "../app.ts";
+import { noStore } from "../middlewares/cache-control.middleware.ts";
 
 const router = Router();
+router.use(noStore);
 
 /**
  * @swagger
