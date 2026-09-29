@@ -3,7 +3,7 @@ import { DOC_EVENTS } from "../events/document.events.ts";
 import { NotFoundError } from "../lib/errors.ts";
 import { appEvents } from "../lib/events.ts";
 import { prisma } from "../lib/prisma.ts";
-import { queueDocumentForProcessing } from "../queues/document.queue.ts";
+import { documentQueue, queueDocumentForProcessing } from "../queues/document.queue.ts";
 import { getUserPermissions } from "./user.service.ts";
 
 export const DOC_MESSAGES = {
@@ -148,5 +148,30 @@ export async function createDocument(data: {
             document,
             jobId,
         }
+    };
+}
+
+export async function getDocProcessingStatus(
+    data: { userId: string, documentId: string }
+) {
+    const document = await prisma.document.findUnique({
+        where: { id: data.documentId },
+        select: { id: true, userId: true, error: true, status: true },
+    });
+
+    if (!document || document.userId != data.userId) {
+        throw new NotFoundError(DOC_MESSAGES.NOT_FOUND);
+    }
+
+    const jobs = await documentQueue.getJobs(["active", "waiting"]);
+    const activeJob = jobs.find(j => j.data.documentId === document.id);
+
+    return {
+        success: true,
+        data: {
+            status: document.status,
+            error: document.error,
+            progress: activeJob ? activeJob.progress : null,
+        },
     };
 }

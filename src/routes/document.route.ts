@@ -2,7 +2,13 @@ import { Router } from "express";
 import { authenticate, requirePermission } from "../middlewares/auth.middleware.ts";
 import { validate } from "../middlewares/validate.middleware.ts";
 import { createDocumentSchema, documentParamsSchema, listDocumentsSchema } from "../validators/document.validator.ts";
-import { createDocumentCOntroller, deleteDocumentController, getDocumentController, listDocumentsController } from "../controllers/document.controller.ts";
+import {
+    createDocumentCOntroller,
+    deleteDocumentController,
+    getDocProcessingStatusController,
+    getDocumentController,
+    listDocumentsController
+} from "../controllers/document.controller.ts";
 
 const router = Router()
 router.use(authenticate)
@@ -29,6 +35,12 @@ router.delete("/",
     requirePermission("documents:delete", "admin:documents:delete"),
     validate(documentParamsSchema),
     deleteDocumentController,
+)
+
+router.get("/:documentId/processing-status",
+    requirePermission("documents:read"),
+    validate(documentParamsSchema),
+    getDocProcessingStatusController,
 )
 
 export default router;

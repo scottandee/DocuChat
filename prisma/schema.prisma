@@ -109,6 +109,7 @@ model Document {
   filename    String
   status      String    @default("pending")
   chunkCount  Int?
+  error       String?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   deletedAt   DateTime?
