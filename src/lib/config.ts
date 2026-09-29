@@ -11,7 +11,7 @@ const envSchema = z.object({
     JWT_REFRESH_SECRET: z.string().min(32, "JWT_REFRESH_SECRET should be at least 32 characters long"),
     ACCESS_TOKEN_EXPIRES_IN: z.string().default("15m"),
     REFRESH_TOKEN_EXPIRES_IN: z.string().default("7d"),
-    OPENAI_API_URL: z.string().optional(),
+    OPENAI_API_KEY: z.string().optional(),
     REDIS_URL: z.string().min(1, "REDIS_URL is required"),
 });
 
