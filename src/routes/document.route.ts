@@ -31,7 +31,7 @@ router.post("/",
     createDocumentCOntroller,
 )
 
-router.delete("/",
+router.delete("/:documentId",
     requirePermission("documents:delete", "admin:documents:delete"),
     validate(documentParamsSchema),
     deleteDocumentController,
