@@ -12,6 +12,7 @@ import { NotFoundError } from "./lib/errors.ts";
 import "./events/admin.events.ts";
 import "./events/document.events.ts";
 import "./queues/document.worker.ts";
+import { bullBoardAdapter } from "./config/bull-board.ts";
 
 const app: Express = express();
 
@@ -45,6 +46,8 @@ app.use("/api/v1/auth", AuthRouter);
 app.use("/api/v1/admin", AdminRouter);
 app.use("/api/v1/documents", DocumentRouter);
 app.use("/api/v1/conversations", ConversationRouter);
+
+app.use("/admin/queues", bullBoardAdapter.getRouter());
 
 app.use((req, res, next) => {
     next(new NotFoundError(
