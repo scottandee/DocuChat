@@ -58,3 +58,33 @@ export function hashkey(parts: string[]) {
         .substring(0, 16);
 }
 
+// Used for the prevention of a Cache Stampede
+export async function cacheGetOrSet<T>(
+    key: string,
+    ttlSeconds: number,
+    fetchFn: () => Promise<T>
+) {
+    const cached = await cacheGet<T>(key);
+    if (cached) return cached;
+
+    const lockKey = `lock:${key}`;
+    const acquired = await cacheRedis.set(
+        lockKey, "1", "EX", 5, "NX"
+    );
+
+    if (acquired) {
+        try {
+            const value = await fetchFn();
+            await cacheSet(key, value, ttlSeconds);
+            return value;
+        } finally {
+            await cacheDel(lockKey);
+        }
+    }
+
+    await new Promise(resolve => setTimeout(resolve, 100));
+    const retried = await cacheGet<T>(key);
+    if (retried) return retried;
+
+    return fetchFn();
+}
