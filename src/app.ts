@@ -14,7 +14,7 @@ import "./events/cache.events.ts";
 import "./events/document.events.ts";
 import "./queues/document.worker.ts";
 import { bullBoardAdapter } from "./config/bull-board.ts";
-import { apiLimiter, authLimiter } from "./middlewares/rate-limiter.miiddleware.ts";
+import { authLimiter } from "./middlewares/rate-limiter.miiddleware.ts";
 import { attachFingerprint } from "./middlewares/fingerprint.middleware.ts";
 
 const app: Express = express();

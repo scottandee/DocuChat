@@ -11,6 +11,7 @@ import {
 } from "../controllers/document.controller.ts";
 import { conditionalGet } from "../middlewares/etag.middleware.ts";
 import { apiLimiter, uploadLimiter } from "../middlewares/rate-limiter.miiddleware.ts";
+import { trackSuspiciousDocumentAccess } from "../middlewares/abuse-detection.middleware.ts";
 
 const router = Router();
 router.use(authenticate);
@@ -23,6 +24,7 @@ router.get("/",
 );
 
 router.get("/:documentId",
+    trackSuspiciousDocumentAccess,
     conditionalGet(),
     requirePermission("documents:read"),
     validate(documentParamsSchema),
