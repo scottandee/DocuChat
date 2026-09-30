@@ -5,10 +5,11 @@ import { validate } from "../middlewares/validate.middleware.ts";
 import { listConversationsSchema } from "../validators/conversation.validator.ts";
 import { conditionalGet } from "../middlewares/etag.middleware.ts";
 import { noCache } from "../middlewares/cache-control.middleware.ts";
-import { chatLimiter } from "../middlewares/rate-limiter.miiddleware.ts";
+import { apiLimiter, chatLimiter } from "../middlewares/rate-limiter.miiddleware.ts";
 
 const router = Router();
 router.use(authenticate);
+router.use(apiLimiter);
 
 router.get("/",
     conditionalGet(),

@@ -10,10 +10,11 @@ import {
     listDocumentsController
 } from "../controllers/document.controller.ts";
 import { conditionalGet } from "../middlewares/etag.middleware.ts";
-import { uploadLimiter } from "../middlewares/rate-limiter.miiddleware.ts";
+import { apiLimiter, uploadLimiter } from "../middlewares/rate-limiter.miiddleware.ts";
 
-const router = Router()
-router.use(authenticate)
+const router = Router();
+router.use(authenticate);
+router.use(apiLimiter);
 
 router.get("/",
     requirePermission("documents:read"),

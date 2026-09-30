@@ -46,7 +46,6 @@ app.get("/api-docs.json", (req, res) => {
 });
 
 app.use("/api/v1/auth", attachFingerprint, authLimiter, AuthRouter);
-app.use("/api/v1", apiLimiter)
 app.use("/api/v1/admin", AdminRouter);
 app.use("/api/v1/documents", DocumentRouter);
 app.use("/api/v1/conversations", ConversationRouter);

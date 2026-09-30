@@ -1,9 +1,11 @@
 import { Router } from "express";
 import { authenticate, requirePermission } from "../middlewares/auth.middleware.ts";
 import { assignRoleController, fetchRolesController, revokeRoleController } from "../controllers/admin.controller.ts";
+import { apiLimiter } from "../middlewares/rate-limiter.miiddleware.ts";
 
 const router = Router();
 router.use(authenticate);
+router.use(apiLimiter);
 router.use(requirePermission("roles:manage"));
 
 router.get("/roles", fetchRolesController);
