@@ -44,8 +44,8 @@ app.get("/api-docs.json", (req, res) => {
     res.json(swaggerSpec);
 });
 
-app.use("/api/v1", apiLimiter)
 app.use("/api/v1/auth", authLimiter, AuthRouter);
+app.use("/api/v1", apiLimiter)
 app.use("/api/v1/admin", AdminRouter);
 app.use("/api/v1/documents", DocumentRouter);
 app.use("/api/v1/conversations", ConversationRouter);
