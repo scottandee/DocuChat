@@ -6,13 +6,13 @@ const REFRESH_SECRET = config.JWT_REFRESH_SECRET;
 
 interface TokenPayload {
     sub: string;
-    role: string;
+    tier: string;
     type: "access" | "refresh";
 }
 
 export function generateAccessToken(user: { id: string, tier: string }) {
     return jwt.sign(
-        { sub: user.id, role: user.tier, type: "access" },
+        { sub: user.id, tier: user.tier, type: "access" },
         ACCESS_SECRET,
         { expiresIn: "15m" },
     );
@@ -20,7 +20,7 @@ export function generateAccessToken(user: { id: string, tier: string }) {
 
 export function generateRefreshToken(user: { id: string, tier: string }) {
     return jwt.sign(
-        { sub: user.id, role: user.tier, type: "refresh" },
+        { sub: user.id, tier: user.tier, type: "refresh" },
         REFRESH_SECRET,
         { expiresIn: "7d" },
     );

@@ -6,7 +6,7 @@ import { getUserPermissions } from "../services/user.service.ts";
 
 declare module "express-serve-static-core" {
     interface Request {
-        user?: { id: string, role: string };
+        user?: { id: string, tier: string };
   }
 }
 
@@ -28,7 +28,7 @@ export function authenticate(
                 throw new UnauthorizedError("Invalid token type");
             }
 
-            req.user = { id: payload.sub, role: payload.role };
+            req.user = { id: payload.sub, tier: payload.tier };
             next();
         }
         catch (error: unknown) {
