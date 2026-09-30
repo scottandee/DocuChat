@@ -34,7 +34,7 @@ export const authLimiter = createRateLimiter({
     windowMs: 15 * 60 * 1000,
     max: 10,
     message: "Too many attempts. Try again later",
-    keyGenerator: (req) => req.ip ? ipKeyGenerator(req.ip) : "anonymous",
+    keyGenerator: (req) => req.fingerprint || (req.ip ? ipKeyGenerator(req.ip) : "anonymous"),
 });
 
 export const apiLimiter = createRateLimiter({
