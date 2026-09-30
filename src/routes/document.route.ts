@@ -10,6 +10,7 @@ import {
     listDocumentsController
 } from "../controllers/document.controller.ts";
 import { conditionalGet } from "../middlewares/etag.middleware.ts";
+import { uploadLimiter } from "../middlewares/rate-limiter.miiddleware.ts";
 
 const router = Router()
 router.use(authenticate)
@@ -28,6 +29,7 @@ router.get("/:documentId",
 );
 
 router.post("/",
+    uploadLimiter,
     requirePermission("documents:create"),
     validate(createDocumentSchema),
     createDocumentCOntroller,

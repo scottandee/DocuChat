@@ -14,6 +14,7 @@ import "./events/cache.events.ts";
 import "./events/document.events.ts";
 import "./queues/document.worker.ts";
 import { bullBoardAdapter } from "./config/bull-board.ts";
+import { apiLimiter, authLimiter } from "./middlewares/rate-limiter.miiddleware.ts";
 
 const app: Express = express();
 
@@ -43,7 +44,8 @@ app.get("/api-docs.json", (req, res) => {
     res.json(swaggerSpec);
 });
 
-app.use("/api/v1/auth", AuthRouter);
+app.use("/api/v1", apiLimiter)
+app.use("/api/v1/auth", authLimiter, AuthRouter);
 app.use("/api/v1/admin", AdminRouter);
 app.use("/api/v1/documents", DocumentRouter);
 app.use("/api/v1/conversations", ConversationRouter);
