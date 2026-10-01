@@ -13,6 +13,7 @@ import "./events/admin.events.ts";
 import "./events/auth.events.ts";
 import "./events/cache.events.ts";
 import "./events/document.events.ts";
+import "./events/security.events.ts";
 import "./queues/document.worker.ts";
 import { bullBoardAdapter } from "./config/bull-board.ts";
 import { authLimiter } from "./middlewares/rate-limiter.miiddleware.ts";
