@@ -4,6 +4,8 @@ import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from ".
 import { userRepository } from "../repositories/user.repository.ts";
 import { prisma } from "../lib/prisma.ts";
 import { ConflictError, UnauthorizedError } from "../lib/errors.ts";
+import { appEvents } from "../lib/events.ts";
+import { AUTH_EVENTS } from "../events/auth.events.ts";
 
 export async function register(data: {
     email: string,
@@ -34,6 +36,12 @@ export async function register(data: {
         });
     }
 
+    appEvents.emit(AUTH_EVENTS.USER_REGISTERED, {
+        id: user.id,
+        email: user.email,
+        tier: user.tier,
+    });
+
     return{ id: user.id, email: user.email, tier: user.tier };
 }
 
@@ -44,11 +52,21 @@ export async function login( data: {
 }) {
     const user = await userRepository.findByEmail(data.email);
     if (!user || !user.isActive) {
+        appEvents.emit(AUTH_EVENTS.LOGIN_FAILED, {
+            email:data.email,
+            deviceInfo: data.deviceInfo,
+            reason: "user_not_found",
+        });
         throw new UnauthorizedError("Invalid Credentials");
     }
 
     const valid = await verifyPassword(data.password, user.passwordHash);
     if (!valid) {
+        appEvents.emit(AUTH_EVENTS.LOGIN_FAILED, {
+            email: data.email,
+            deviceInfo: data.deviceInfo,
+            reason: "wrong_password",
+        });
         throw new UnauthorizedError("Invalid Credentials");
     }
 
@@ -66,6 +84,11 @@ export async function login( data: {
             userId: user.id,
             expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         }
+    });
+
+    appEvents.emit(AUTH_EVENTS.USER_LOGGED_IN, {
+        userId: user.id,
+        deviceInfo: data.deviceInfo,
     });
 
     return {
