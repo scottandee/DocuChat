@@ -18,10 +18,12 @@ import "./queues/document.worker.ts";
 import { bullBoardAdapter } from "./config/bull-board.ts";
 import { authLimiter } from "./middlewares/rate-limiter.miiddleware.ts";
 import { attachFingerprint } from "./middlewares/fingerprint.middleware.ts";
+import { sanitizeInput } from "./middlewares/sanitize-input.middleware.ts";
 
 const app: Express = express();
 
 app.use(express.json());
+app.use(sanitizeInput);
 
 // ======== REQUEST LOGGING ===========
 app.use((req: Request, res: Response, next: NextFunction) => {
