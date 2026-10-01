@@ -2,4 +2,7 @@ node_modules/
 coverage/
 prisma/generated/
 .env
+.env.local
+.env.*.local
+*.db
 *lock.toml
