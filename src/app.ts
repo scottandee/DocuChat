@@ -19,10 +19,33 @@ import { bullBoardAdapter } from "./config/bull-board.ts";
 import { authLimiter } from "./middlewares/rate-limiter.miiddleware.ts";
 import { attachFingerprint } from "./middlewares/fingerprint.middleware.ts";
 import { sanitizeInput } from "./middlewares/sanitize-input.middleware.ts";
+import helmet from "helmet";
+import cors from "cors";
 
 const app: Express = express();
 
 app.use(express.json());
+app.use(helmet());
+
+const allowedOrigins = [
+    config.FRONTEND_URL || "http://localhost:3000",
+];
+app.use(cors({
+    origin: (origin, callback) => {
+        if (!origin) return callback(null, true);
+
+        if(allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error(`Origin ${origin} not allowed by CORS`));
+        }
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PATCH", "DELETE", "PUT"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    maxAge: 86400,
+}));
+
 app.use(sanitizeInput);
 
 // ======== REQUEST LOGGING ===========
