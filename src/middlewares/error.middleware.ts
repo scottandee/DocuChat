@@ -17,7 +17,7 @@ export function errorHandler(
             error: {
                 code: error.code,
                 message: !error.isOperational ? "Internal Server Error": error.message,
-                ...(error.details && { details: error.details }),
+                ...(error.details ? { details: error.details } : {}),
             },
         });
     }
