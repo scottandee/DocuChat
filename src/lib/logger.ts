@@ -1,17 +1,27 @@
-import pino from "pino";
+import winston from "winston";
 import { config } from "./config.ts";
 
-export const logger = pino({
-    level: config.NODE_ENV === "production" ? "info": "debug",
-    transport: 
-        config.NODE_ENV !== "production" 
-            ?   {
-                    target: "pino-pretty",
-                    options: {
-                        colorize: "true",
-                        translateTime: "SYS:standard",
-                        ignore: "pid,hostname",
-                    }
-                }
-            : undefined,
-})
+const isProduction = config.NODE_ENV === "production";
+
+export const logger = winston.createLogger({
+    level: isProduction ? "info" : "debug",
+    format: winston.format.combine(
+        winston.format.timestamp(),
+        winston.format.errors({ stack: true }),
+        isProduction 
+            ? winston.format.json() 
+            : winston.format.combine(
+                winston.format.colorize(),
+                winston.format.printf(({ timestamp, level, message, ...meta }) => {
+                    const metaStr = Object.keys(meta).length
+                        ? ` ${JSON.stringify(meta)}`
+                        : "";
+                    return `${timestamp} ${level}: ${message} ${metaStr}`;
+                }),
+            ),
+    ),
+    defaultMeta: { service: "docuchat" },
+    transports: [
+        new winston.transports.Console(),
+    ]
+});
