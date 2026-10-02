@@ -21,6 +21,7 @@ import { attachFingerprint } from "./middlewares/fingerprint.middleware.ts";
 import { sanitizeInput } from "./middlewares/sanitize-input.middleware.ts";
 import helmet from "helmet";
 import cors from "cors";
+import { requestLogger } from "./middlewares/request-logger.middleware.ts";
 
 const app: Express = express();
 
@@ -47,16 +48,7 @@ app.use(cors({
 }));
 
 app.use(sanitizeInput);
-
-// ======== REQUEST LOGGING ===========
-app.use((req: Request, res: Response, next: NextFunction) => {
-    logger.info({
-        method: req.method,
-        url: req.url,
-        ip: req.ip,
-    });
-    next();
-});
+app.use(requestLogger);
 
 // ========= HEALTH CHECK ================
 app.get("/health", (req: Request, res: Response) => {
