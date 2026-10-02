@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import type z from "zod";
+import { ValidationError } from "../lib/errors.ts";
 
 export function validate(schema: z.ZodObject) {
     return (req: Request, res: Response, next: NextFunction) => {
@@ -14,14 +15,7 @@ export function validate(schema: z.ZodObject) {
                 field: err.path.slice(1).join("."),
                 message: err.message,
             }));
-            return res.status(400).json({
-                success: false,
-                error: {
-                    code: "VALIDATION_ERROR",
-                    message: "Request validation failed",
-                    errors,
-                }
-            });
+            throw new ValidationError("Request validation failed", errors);
         }
         req.body = result.data.body ?? req.body;
         req.params = (result.data.params ?? req.params) as Request["params"];
