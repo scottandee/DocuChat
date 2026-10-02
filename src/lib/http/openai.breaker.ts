@@ -1,6 +1,7 @@
 import CircuitBreaker from "opossum";
 import { openaiClient } from "./openai.client.ts";
 import { withRetry } from "./retry.ts";
+import { logger } from "../logger.ts";
 
 async function callOpenAI<TBody>(path: string, body: TBody) {
     return withRetry(() => openaiClient.post(path, body));
@@ -19,13 +20,22 @@ openaiBreaker.fallback(() => {
 });
 
 openaiBreaker.on("open", () => {
-    console.warn("OpenAI circuit breaker OPENED - requests will fail fast");
+    logger.warn("OpenAI circuit breaker OPENED", {
+        dependency: "openai",
+        state: "open"
+    });
 });
 
 openaiBreaker.on("halfOpen", () => {
-    console.warn("OpenAI circuit breaker HALF-OPEN - testing recovery");
+    logger.warn("OpenAI circuit breaker HALF-OPEN", {
+        dependency: "openai",
+        state: "half-open",
+    });
 });
 
 openaiBreaker.on("close", () => {
-    console.log("OpenAI circuit breaker CLOSED - normal operation");
+    logger.info("OpenAI circuit breaker CLOSED", {
+        dependency: "openai",
+        state: "closed",
+    });
 });

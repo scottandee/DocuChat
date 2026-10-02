@@ -88,7 +88,7 @@ export async function getDocument(data: {
 }
 
 export async function deleteDocument(data: {
-     userId: string, documentId: string
+     userId: string, documentId: string, correlationId: string
 }) {
     const document = await prisma.document.findUnique({
         where: { id: data.documentId },
@@ -114,6 +114,7 @@ export async function deleteDocument(data: {
         deletedBy: data.userId,
         documentId: data.documentId,
         title: document.title,
+        correlationId: data.correlationId,
     });
 
     return result;
@@ -123,6 +124,7 @@ export async function createDocument(data: {
     title: string,
     content: string,
     userId: string,
+    correlationId: string
 }) {
     const document = await prisma.document.create({
         data: {
@@ -140,6 +142,7 @@ export async function createDocument(data: {
         documentId: document.id,
         userId: data.userId,
         title: document.title,
+        correlationId: data.correlationId,
     });
 
     return {

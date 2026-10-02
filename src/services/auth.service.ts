@@ -9,7 +9,8 @@ import { AUTH_EVENTS } from "../events/auth.events.ts";
 
 export async function register(data: {
     email: string,
-    password: string
+    password: string,
+    correlationId: string
 }) {
     const existing = await userRepository.findByEmail(data.email);
     if (existing) {
@@ -40,6 +41,7 @@ export async function register(data: {
         id: user.id,
         email: user.email,
         tier: user.tier,
+        correlationId: data.correlationId,
     });
 
     return{ id: user.id, email: user.email, tier: user.tier };
@@ -48,6 +50,7 @@ export async function register(data: {
 export async function login( data: {
     email: string,
     password: string,
+    correlationId: string,
     deviceInfo?: string,
 }) {
     const user = await userRepository.findByEmail(data.email);
@@ -56,6 +59,7 @@ export async function login( data: {
             email:data.email,
             deviceInfo: data.deviceInfo,
             reason: "user_not_found",
+            correlationId: data.correlationId,
         });
         throw new UnauthorizedError("Invalid Credentials");
     }
@@ -66,6 +70,7 @@ export async function login( data: {
             email: data.email,
             deviceInfo: data.deviceInfo,
             reason: "wrong_password",
+            correlationId: data.correlationId,
         });
         throw new UnauthorizedError("Invalid Credentials");
     }
@@ -89,6 +94,7 @@ export async function login( data: {
     appEvents.emit(AUTH_EVENTS.USER_LOGGED_IN, {
         userId: user.id,
         deviceInfo: data.deviceInfo,
+        correlationId: data.correlationId,
     });
 
     return {

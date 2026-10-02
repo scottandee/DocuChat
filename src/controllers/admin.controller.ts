@@ -19,6 +19,7 @@ export async function assignRoleController(
         const result = await assignRole({
             userId: req.params.userId,
             assignedBy: req.user?.id,
+            correlationId: req.correlationId,
             ...req.body,
         });
         res.json(result);
@@ -35,6 +36,7 @@ export async function revokeRoleController(
             userId: req.params.userId,
             roleName: req.params.roleName,
             revokedBy: req.user?.id,
+            correlationId: req.correlationId,
             ...req.body,
          });
         res.json(result);

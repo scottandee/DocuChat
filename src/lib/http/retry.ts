@@ -1,4 +1,5 @@
 import { AxiosError } from "axios";
+import { logger } from "../logger.ts";
 
 function isRetryable(error: AxiosError): boolean {
     if (!error.response) return true;
@@ -37,10 +38,15 @@ export async function withRetry<T>(
                 ? parseInt(retryAfter) * 1000
                 : baseDelayMs * Math.pow(2, attempt - 1);
 
-            console.warn(
-                `Attempt ${attempt} failed, retrying in ${delayMs}ms`,
-                error.message,
-            );
+            logger.warn("Retrying failed HTTP request", {
+                attempt,
+                maxAttempts,
+                delayMs: Math.round(delayMs),
+                statusCode: error.response?.status,
+                errorCode: error.code,
+                message: error.message,
+                stack: error.stack,
+            });
             
             await delay(delayMs);
         }

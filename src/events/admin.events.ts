@@ -1,4 +1,5 @@
 import { appEvents } from "../lib/events.ts";
+import { logger } from "../lib/logger.ts";
 import { prisma } from "../lib/prisma.ts";
 
 export const ADMIN_EVENTS = {
@@ -20,7 +21,13 @@ appEvents.on(ADMIN_EVENTS.ROLE_ASSIGNED, async (data) => {
             }),
         }});
     } catch(error) {
-        console.error("Failed to log role assignment:", error);
+        logger.error("Failed to log role assignment", {
+            correlationId: data.correlationId,
+            userId: data.assignedBy,
+            targetUserId: data.targetUserId,
+            roleName: data.roleName,
+            error,
+        });
     }
 });
 
@@ -38,6 +45,12 @@ appEvents.on(ADMIN_EVENTS.ROLE_REVOKED, async (data) => {
             }),
         }});
     } catch(error) {
-        console.error("Failed to log role revocation:", error);
+        logger.error("Failed to log role assignment", {
+            correlationId: data.correlationId,
+            userId: data.revokedBy,
+            targetUserId: data.targetUserId,
+            roleName: data.roleName,
+            error,
+        });
     }
 });

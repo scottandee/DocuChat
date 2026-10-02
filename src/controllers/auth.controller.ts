@@ -5,7 +5,10 @@ export async function registerController(
     req: Request, res: Response, next: NextFunction
 ) {
     try {
-        const user = await authService.register({ ...req.body });
+        const user = await authService.register({
+            ...req.body,
+            correlationId: req.correlationId
+        });
         res.status(201).json(user);
     }
     catch(error) {
@@ -19,6 +22,7 @@ export async function loginController(
     try {
         const result = await authService.login({
             ...req.body,
+            correlationId: req.correlationId,
             deviceInfo: req.headers["user-agent"],
         });
         res.status(200).json(result);

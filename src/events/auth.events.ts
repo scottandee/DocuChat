@@ -1,4 +1,5 @@
 import { appEvents } from "../lib/events.ts";
+import { logger } from "../lib/logger.ts";
 import { prisma } from "../lib/prisma.ts";
 
 export const AUTH_EVENTS = {
@@ -9,32 +10,40 @@ export const AUTH_EVENTS = {
     LOGIN_FAILED: "auth:login-failed",
 };
 
-appEvents.on(AUTH_EVENTS.USER_REGISTERED, async (user) => {
+appEvents.on(AUTH_EVENTS.USER_REGISTERED, async (data) => {
     try {
         await prisma.usageLog.create({ data: {
-            userId: user.id,
+            userId: data.id,
             action: "signup",
             tokens: 0,
             costUsd: 0,
             metadata: JSON.stringify({
-                email: user.email,
-                tier: user.tier,
-                registeredAt: new Date().toISOString,
+                email: data.email,
+                tier: data.tier,
+                registeredAt: new Date().toISOString(),
             }),
         }});
     } catch(error) {
-        console.error("Failed to log signup: ", error);
+        logger.error("Failed to log user registration", {
+            correlationId: data.correlationId,
+            userId: data.id,
+            error,
+        });
     }
 });
 
-appEvents.on(AUTH_EVENTS.USER_REGISTERED, async (user) => {
+appEvents.on(AUTH_EVENTS.USER_REGISTERED, async (data) => {
     try {
         await prisma.conversation.create({ data: {
-            userId: user.id,
+            userId: data.id,
             title: "Welcome to DocuChat",
         }});
     } catch(error) {
-        console.error("Failed to create welcome conversation: ", error);
+        logger.error("Failed to create welcome conversation", {
+            correlationId: data.correlationId,
+            userId: data.id,
+            error,
+        });
     }
 });
 
@@ -51,16 +60,19 @@ appEvents.on(AUTH_EVENTS.USER_LOGGED_IN, async (data) => {
             }),
         }});
     } catch (error) {
-        console.error("Failed to log login: ", error);
+        logger.error("Failed to log user login", {
+            correlationId: data.correlationId,
+            userId: data.userId,
+            error,
+        });
     }
 });
 
 appEvents.on(AUTH_EVENTS.LOGIN_FAILED, async (data) => {
-    try {
-        console.warn(
-            `Failed login attempt for ${data.email} from ${data.deviceInfo} because of ${data.reason}`
-        );
-    } catch(error) {
-        console.error("Failed to log login failed: ", error);
-    }
+    logger.warn("User login failed", {
+        correlationId: data.correlationId,
+        email: data.email,
+        reason: data.reason,
+        deviceInfo: data.deviceInfo,
+    });
 });

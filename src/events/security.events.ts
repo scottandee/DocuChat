@@ -1,5 +1,6 @@
 import { cacheRedis } from "../lib/cache.ts";
 import { appEvents } from "../lib/events.ts";
+import { logger } from "../lib/logger.ts";
 import { AUTH_EVENTS } from "./auth.events.ts";
 
 appEvents.on(AUTH_EVENTS.LOGIN_FAILED, async (data) => {
@@ -12,11 +13,20 @@ appEvents.on(AUTH_EVENTS.LOGIN_FAILED, async (data) => {
         }
 
         if (failures >= 5) {
-            console.warn(
-                `Security: ${failures} failed login attempts from ${data.deviceInfo} on ${data.email}`
-            );
+            logger.warn("Repeated login failures detected", {
+                correlationId: data.correlationId,
+                email: data.email,
+                deviceInfo: data.deviceInfo,
+                failures,
+                windowSeconds: 900,
+                event: AUTH_EVENTS.LOGIN_FAILED,
+            });
         }
     } catch (error) {
-        console.error("Failed to track login failure: ", error);
+        logger.error("Failed to track login failure", {
+            correlationId: data.correlationId,
+            email: data.email,
+            error,
+        });
     }
 });

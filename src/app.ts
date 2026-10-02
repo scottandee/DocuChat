@@ -1,10 +1,9 @@
-import express, { type Express, type NextFunction, type Request, type Response } from "express";
+import express, { type Express, type Request, type Response } from "express";
 import AuthRouter from "./routes/auth.route.ts";
 import AdminRouter from "./routes/admin.route.ts";
 import DocumentRouter from "./routes/document.route.ts";
 import ConversationRouter from "./routes/conversation.route.ts";
 import { config } from "./lib/config.ts";
-import { logger } from "./lib/logger.ts";
 import swaggerUi from "swagger-ui-express"
 import { swaggerSpec } from "./config/swagger.ts";
 import { errorHandler } from "./middlewares/error.middleware.ts";

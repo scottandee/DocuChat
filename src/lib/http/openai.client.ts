@@ -6,12 +6,15 @@ import type {
 } from "axios";
 import axios from "axios";
 import { config } from "../config.ts";
+import { logger } from "../logger.ts";
 
 declare module "axios" {
     export interface InternalAxiosRequestConfig {
         metadata?: {
             startTime: number;
+            correlationId?: string;
         },
+        correlationId?: string;
     }
 };
 
@@ -27,34 +30,67 @@ export const openaiClient: AxiosInstance = axios.create({
 
 openaiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
     const startTime = Date.now();
-    config.metadata = { startTime };
-    console.log(`OpenAI ${config.method?.toUpperCase} ${config.url}`)
+    config.metadata = { startTime, correlationId: config.correlationId };
+    
+    logger.debug("OpenAI request started", {
+        correlationId: config.correlationId,
+        method: config.method?.toUpperCase(),
+        url: config.url,
+    });
+    
     return config;
 });
 
 openaiClient.interceptors.response.use(
     (response: AxiosResponse) => {
         const startTime = response.config.metadata?.startTime;
-        const duration = startTime ? Date.now() - startTime: 0;
-        console.log(
-            `OpenAI ${response.status} ${response.config.url} ${duration}ms`
-        );
+        const durationMs = startTime ? Date.now() - startTime: 0;
+        
+        logger.info("OpenAI request completed", {
+            correlationId: response.config.metadata?.correlationId,
+            method: response.config.method?.toUpperCase(),
+            url: response.config.url,
+            statusCode: response.status,
+            durationMs,
+        });
+        
         return response
     },
     (error: AxiosError) => {
         const startTime = error.config?.metadata?.startTime;
-        const duration = startTime ? Date.now() - startTime: 0;
+        const durationMs = startTime ? Date.now() - startTime: 0;
+        const correlationId = error.config?.metadata?.correlationId;
 
         if (error.response) {
-            console.error(
-                `OpenAI ${error.response.status} ${error.config?.url}`
-            );
+           logger.error("OpenAI request failed", {
+                correlationId,
+                method: error.config?.method?.toUpperCase(),
+                url: error.config?.url,
+                statusCode: error.response.status,
+                durationMs,
+                errorCode: error.code,
+                message: error.message,
+                stack: error.stack,
+            });
         } else if (error.request) {
-            console.error(
-                `OpenAI no response ${error.config?.url} ${duration}ms`
-            );
+            logger.error("OpenAI request received no response", {
+                correlationId,
+                method: error.config?.method?.toUpperCase(),
+                url: error.config?.url,
+                durationMs,
+                errorCode: error.code,
+                message: error.message,
+                stack: error.stack,
+            });
         } else {
-            console.error("OpenAI request setup error:", error.message);
+            logger.error("OpenAI request setup failed", {
+                correlationId,
+                method: error.config?.method?.toUpperCase(),
+                url: error.config?.url,
+                errorCode: error.code,
+                message: error.message,
+                stack: error.stack,
+            });
         }
 
         return Promise.reject(error);

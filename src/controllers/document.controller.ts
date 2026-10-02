@@ -44,6 +44,7 @@ export async function deleteDocumentController(
         const result = await deleteDocument({
             userId: req.user!.id,
             documentId: req.params.documentId,
+            correlationId: req.correlationId,
             ...req.body
         });
         return res.json(result);
@@ -57,6 +58,7 @@ export async function createDocumentCOntroller(
 ) {
     try {
         const result = await createDocument({
+            correlationId: req.correlationId,
             ...req.body, userId: req.user!.id  
         });
         return res.status(202).json(result);

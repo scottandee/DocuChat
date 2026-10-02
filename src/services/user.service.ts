@@ -60,7 +60,7 @@ export async function fetchRoles() {
 }
 
 export async function assignRole(data: {
-    userId: string, assignedBy: string, roleName: string,
+    userId: string, assignedBy: string, roleName: string, correlationId: string
 }) {
     const user = await prisma.user.findUnique({ where: { id: data.userId } });
     if (!user) throw new NotFoundError("User not found");
@@ -82,6 +82,7 @@ export async function assignRole(data: {
         targetUserId: data.userId,
         roleName: data.roleName,
         assignedBy: data.assignedBy,
+        correlationId: data.correlationId,
     })
 
     return {
@@ -91,7 +92,7 @@ export async function assignRole(data: {
 }
 
 export async function revokeRole(data: {
-    userId: string, revokedBy: string, roleName: string,
+    userId: string, revokedBy: string, roleName: string, correlationId: string
 }) {
     const user = await prisma.user.findUnique({ where: { id: data.userId } });
     if (!user) throw new NotFoundError("User not found");
@@ -107,6 +108,7 @@ export async function revokeRole(data: {
         targetUserId: data.userId,
         roleName: data.roleName,
         revokedBy: data.revokedBy,
+        correlationId: data.correlationId,
     });
 
     return {
