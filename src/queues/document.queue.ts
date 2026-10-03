@@ -15,11 +15,11 @@ export const documentQueue = new Queue("document-processing", {
 });
 
 export async function queueDocumentForProcessing(
-    documentId: string, userId: string
+    documentId: string, userId: string, correlationId: string
 ) {
     const job = await documentQueue.add(
         "process-document",
-        { documentId, userId, queuedAt: Date.now() },
+        { documentId, userId, correlationId, queuedAt: Date.now() },
     );
 
     return job.id;

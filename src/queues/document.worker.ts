@@ -5,12 +5,20 @@ import { estimateTokens, splitIntoChunks } from "../lib/chunker.ts";
 import { appEvents } from "../lib/events.ts";
 import { DOC_EVENTS } from "../events/document.events.ts";
 import { deadLetterQueue } from "./dead-letter.queue.ts";
+import { logger } from "../lib/logger.ts";
 
 const worker = new Worker(
     "document-processing",
     async (job: Job) => {
-        const { documentId, userId } = job.data;
-        console.log(`Processing document ${documentId} (attempt ${job.attemptsMade + 1})`);
+        const { documentId, userId, correlationId } = job.data;
+
+        logger.info("Document processing started", {
+            correlationId,
+            jobId: job.id,
+            documentId,
+            userId,
+            attempt: job.attemptsMade + 1,
+        });
 
         const document = await prisma.document.findUniqueOrThrow({
             where: { id: documentId },
@@ -56,7 +64,21 @@ const worker = new Worker(
             return { success: true, chunks: chunks.length };
 
         } catch(error) {
-            if (job.attemptsMade >= (job.opts.attempts ?? 3) - 1) {
+            const maxAttempts = (job.opts.attempts ?? 3);
+            const isFinalAttempt = job.attemptsMade >= maxAttempts - 1;
+
+            logger.error("Document processing failed", {
+                correlationId,
+                jobId: job.id,
+                documentId,
+                userId,
+                attempt: job.attemptsMade + 1,
+                maxAttempts,
+                isFinalAttempt,
+                error,
+            });
+
+            if (isFinalAttempt) {
                 await prisma.document.update({
                     where: { id: documentId },
                     data: { status: "failed", error: (error as Error).message },
@@ -72,28 +94,55 @@ const worker = new Worker(
 );
 
 worker.on("completed", (job) => {
-    console.log(`Job ${job.id} completed: ${job.returnvalue.chunks} chunks`);
-})
+    logger.info("Document processing job completed", {
+        correlationId: job.data.correlationId,
+        jobId: job.id,
+        documentId: job.data.documentId,
+        userId: job.data.userId,
+        chunks: job.returnvalue?.chunks,
+    });
+});
 
 worker.on("failed", async (job, error) => {
     if (!job) return;
 
-    if (job.attemptsMade >= (job.opts.attempts ?? 3)) {
-        console.error(`Job ${job?.id} failed: (attempts ${job?.attemptsMade}):`, error.message);
-        
-        await deadLetterQueue.add("failed-document", {
-            originalJobId: job.id,
-            OriginalQueue: "document-processing",
-            data: job.data,
-            error: error.message,
-            failedAt: new Date().toISOString(),
-            attempts: job.attemptsMade,
+    const maxAttempts = job.opts.attempts ?? 3;
+    const isFinalAttempt = job.attemptsMade >= maxAttempts;
+    if (!isFinalAttempt) {
+        logger.warn("Document processing job will be retried", {
+            correlationId: job.data.correlationId,
+            jobId: job.id,
+            documentId: job.data.documentId,
+            attempt: job.attemptsMade,
+            maxAttempts,
+            error,
         });
+
+        return;
     }
+    
+    logger.error("Document processing job permanently failed", {
+        correlationId: job.data.correlationId,
+        jobId: job.id,
+        documentId: job.data.documentId,
+        attempts: job.attemptsMade,
+        error,
+    });
+        
+    await deadLetterQueue.add("failed-document", {
+        originalJobId: job.id,
+        originalQueue: "document-processing",
+        data: job.data,
+        error: error.message,
+        failedAt: new Date().toISOString(),
+        attempts: job.attemptsMade,
+    });
 });
 
 worker.on("error", (error) => {
-    console.error("Worker error: ", error);
+    logger.error("Document processing worker error", {
+        error,
+    });
 });
 
 export { worker };

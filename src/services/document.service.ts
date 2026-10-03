@@ -136,7 +136,9 @@ export async function createDocument(data: {
         },
     });
 
-    const jobId = await queueDocumentForProcessing(document.id, data.userId);
+    const jobId = await queueDocumentForProcessing(
+        document.id, data.userId, data.correlationId
+    );
 
     appEvents.emit(DOC_EVENTS.CREATED, {
         documentId: document.id,
