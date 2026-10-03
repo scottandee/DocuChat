@@ -15,15 +15,16 @@ import { trackSuspiciousDocumentAccess } from "../middlewares/abuse-detection.mi
 
 const router = Router();
 router.use(authenticate);
-router.use(apiLimiter);
 
 router.get("/",
+    apiLimiter,
     requirePermission("documents:read"),
     validate(listDocumentsSchema),
     listDocumentsController,
 );
 
 router.get("/:documentId",
+    apiLimiter,
     trackSuspiciousDocumentAccess,
     conditionalGet(),
     requirePermission("documents:read"),
@@ -39,12 +40,14 @@ router.post("/",
 )
 
 router.delete("/:documentId",
+    apiLimiter,
     requirePermission("documents:delete", "admin:documents:delete"),
     validate(documentParamsSchema),
     deleteDocumentController,
 )
 
 router.get("/:documentId/processing-status",
+    apiLimiter,
     requirePermission("documents:read"),
     validate(documentParamsSchema),
     getDocProcessingStatusController,

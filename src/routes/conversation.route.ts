@@ -9,9 +9,9 @@ import { apiLimiter, chatLimiter } from "../middlewares/rate-limiter.miiddleware
 
 const router = Router();
 router.use(authenticate);
-router.use(apiLimiter);
 
 router.get("/",
+    apiLimiter,
     conditionalGet(),
     requirePermission("conversations:read"),
     noCache,
