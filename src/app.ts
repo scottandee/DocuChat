@@ -22,6 +22,8 @@ import { sanitizeInput } from "./middlewares/sanitize-input.middleware.ts";
 import helmet from "helmet";
 import cors from "cors";
 import { requestLogger } from "./middlewares/request-logger.middleware.ts";
+import { metricsMiddleware } from "./middlewares/metrics.middleware.ts";
+import { metricsRegistry } from "./lib/metrics.ts";
 
 const app: Express = express();
 
@@ -49,6 +51,12 @@ app.use(cors({
 
 app.use(sanitizeInput);
 app.use(requestLogger);
+app.use(metricsMiddleware);
+
+app.get("/metrics", async (req, res) => {
+    res.set("Content-Type", metricsRegistry.contentType);
+    res.send(await metricsRegistry.metrics());
+})
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.get("/api-docs.json", (req, res) => {

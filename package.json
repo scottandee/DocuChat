@@ -20,6 +20,7 @@
     "@bull-board/express": "^9.10.1",
     "@prisma/adapter-pg": "^7.10.0",
     "@prisma/client": "^7.10.0",
+    "@prometheus-io/client": "^0.16.1",
     "@types/bcryptjs": "^2.4.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/opossum": "^8.1.9",
