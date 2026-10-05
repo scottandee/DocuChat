@@ -124,7 +124,7 @@ model Document {
 model Conversation {
   id          String    @id @default(cuid())
   userId      String
-  title       String
+    title       String
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
@@ -154,8 +154,11 @@ model Chunk {
   index       Int
   content     String
   tokenCount  Int
+  embedding   Unsupported("vector(1536)")?
   error       String?
   createdAt   DateTime  @default(now())
 
-  document    Document  @relation(fields: [documentId], references: [id])
+  document    Document  @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@index([documentId])
 }
